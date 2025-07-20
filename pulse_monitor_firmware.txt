@@ -1,0 +1,36 @@
+// pulse_monitor.ino
+// Arduino code to read pulse sensor and calculate BPM
+
+const int pulsePin = A0;
+unsigned long lastBeatTime = 0;
+int BPM;
+int beatCount = 0;
+bool pulseDetected = false;
+int threshold = 550;  // Adjust based on your sensor
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(pulsePin, INPUT);
+}
+
+void loop() {
+  int signal = analogRead(pulsePin);
+  unsigned long currentTime = millis();
+
+  if (signal > threshold && !pulseDetected) {
+    pulseDetected = true;
+    unsigned long delta = currentTime - lastBeatTime;
+    lastBeatTime = currentTime;
+
+    if (delta > 300) { // To filter noise
+      BPM = 60000 / delta;
+      Serial.println(BPM);
+    }
+  }
+
+  if (signal < threshold) {
+    pulseDetected = false;
+  }
+
+  delay(10); // Smooth reading
+}
